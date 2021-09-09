@@ -531,8 +531,13 @@ class TC_30_Syscall(RegressionTestCase):
         self.assertIn('TEST OK', stdout)
 
     def test_033_rename_unlink_chroot(self):
-        file1 = 'tmp/file1'
-        file2 = 'tmp/file2'
+        self._test_rename_unlink_chroot('tmp/file1', 'tmp/file2')
+
+    def test_034_rename_unlink_pf(self):
+        os.makedirs('tmp/pf', exist_ok=True)
+        self._test_rename_unlink_chroot('tmp/pf/file1', 'tmp/pf/file2')
+
+    def _test_rename_unlink_local(self, file1, file2)
         try:
             stdout, _ = self.run_binary(['rename_unlink', file1, file2])
         finally:
@@ -542,7 +547,7 @@ class TC_30_Syscall(RegressionTestCase):
         self.assertIn('TEST OK', stdout)
 
     @unittest.skip('tmpfs needs to be rewritten to use inodes')
-    def test_034_rename_unlink_tmpfs(self):
+    def test_035_rename_unlink_tmpfs(self):
         file1 = '/mnt/tmpfs/file1'
         file2 = '/mnt/tmpfs/file2'
         stdout, _ = self.run_binary(['rename_unlink', file1, file2])
