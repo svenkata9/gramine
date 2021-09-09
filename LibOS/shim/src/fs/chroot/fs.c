@@ -755,12 +755,13 @@ static int chroot_checkin(struct shim_handle* hdl) {
      * restore). */
 
     if (!hdl->pal_handle) {
-        PAL_HANDLE palhdl;
+        PAL_HANDLE palhdl = NULL;
         int ret = chroot_reopen(hdl, &palhdl);
         if (ret < 0) {
             log_warning("%s: failed to open %s: %d", __func__, qstrgetstr(&hdl->uri), ret);
             return ret;
         }
+        assert(palhdl);
         hdl->pal_handle = palhdl;
     }
     return 0;
