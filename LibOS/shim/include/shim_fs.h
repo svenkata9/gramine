@@ -306,7 +306,7 @@ int init_mount(void);
  *
  * The function will ensure that the mountpoint exists: new dentries marked with DENTRY_SYNTHETIC
  * will be created, if necessary. This is a departure from Unix mount, necessary to implement
- * Graphene manifest semantics.
+ * Gramine manifest semantics.
  *
  * TODO: On failure, this function does not clean the synthetic nodes it just created.
  */
@@ -340,7 +340,7 @@ void dump_dcache(struct shim_dentry* dent);
  * \param dentry the dentry to check
  * \param mask mask, same as for Unix access
  *
- * Checks permissions for a dentry. Because Graphene currently has no notion of users, this will
+ * Checks permissions for a dentry. Because Gramine currently has no notion of users, this will
  * always use the "user" part of file mode.
  *
  * The caller should hold `g_dcache_lock`.

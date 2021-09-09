@@ -31,10 +31,10 @@ class TC_00_Unittests(RegressionTestCase):
         except subprocess.CalledProcessError as e:
             stderr = e.stderr.decode()
             self.assertIn('run_test("undefined") ...', stderr,
-                          'Graphene should not abort before attempting to run test')
+                          'Gramine should not abort before attempting to run test')
             self.assertIn('ubsan: overflow', stderr)
             self.assertNotIn('run_test("undefined") =', stderr,
-                             'Graphene should abort before returning to application')
+                             'Gramine should abort before returning to application')
 
 class TC_01_Bootstrap(RegressionTestCase):
     def test_001_helloworld(self):
@@ -107,7 +107,7 @@ class TC_01_Bootstrap(RegressionTestCase):
 
     @unittest.skipUnless(HAS_SGX,
         'This test is only meaningful on SGX PAL because only SGX catches raw '
-        'syscalls and redirects to Graphene\'s LibOS. If we will add seccomp to '
+        'syscalls and redirects to Gramine\'s LibOS. If we will add seccomp to '
         'Linux PAL, then we should allow this test on Linux PAL as well.')
     def test_105_basic_bootstrapping_static(self):
         stdout, _ = self.run_binary(['bootstrap_static'])
@@ -271,7 +271,7 @@ class TC_01_Bootstrap(RegressionTestCase):
 
 @unittest.skipUnless(HAS_SGX,
     'This test is only meaningful on SGX PAL because only SGX catches raw '
-    'syscalls and redirects to Graphene\'s LibOS. If we will add seccomp to '
+    'syscalls and redirects to Gramine\'s LibOS. If we will add seccomp to '
     'Linux PAL, then we should allow this test on Linux PAL as well.')
 class TC_02_OpenMP(RegressionTestCase):
     def test_000_simple_for_loop(self):
@@ -310,7 +310,7 @@ class TC_03_FileCheckPolicy(RegressionTestCase):
         if os.path.exists('nonexisting_testfile'):
             os.remove('nonexisting_testfile')
         try:
-            # this tests a previous bug in Graphene that allowed creating unknown files
+            # this tests a previous bug in Gramine that allowed creating unknown files
             self.run_binary(['file_check_policy_strict', 'append', 'nonexisting_testfile'])
             self.fail('expected to return nonzero')
         except subprocess.CalledProcessError as e:
@@ -481,8 +481,8 @@ class TC_30_Syscall(RegressionTestCase):
         self.assertIn('Test was successful', stdout)
 
     def test_030_fopen(self):
-        if os.path.exists("tmp/filecreatedbygraphene"):
-            os.remove("tmp/filecreatedbygraphene")
+        if os.path.exists("tmp/filecreatedbygramine"):
+            os.remove("tmp/filecreatedbygramine")
         stdout, _ = self.run_binary(['fopen_cornercases'])
 
         # fopen corner cases
@@ -640,7 +640,7 @@ class TC_30_Syscall(RegressionTestCase):
             self.run_binary(['sighandler_sigpipe'])
             self.fail('expected to return nonzero')
         except subprocess.CalledProcessError as e:
-            # FIXME: It's unclear what Graphene process should return when the app
+            # FIXME: It's unclear what Gramine process should return when the app
             # inside dies due to a signal.
             self.assertTrue(e.returncode in [signal.SIGPIPE, 128 + signal.SIGPIPE])
             stdout = e.stdout.decode()
@@ -691,7 +691,7 @@ class TC_30_Syscall(RegressionTestCase):
 class TC_31_Syscall(RegressionTestCase):
     @unittest.skipUnless(HAS_SGX,
         'This test is only meaningful on SGX PAL because only SGX catches raw '
-        'syscalls and redirects to Graphene\'s LibOS. If we will add seccomp to '
+        'syscalls and redirects to Gramine\'s LibOS. If we will add seccomp to '
         'Linux PAL, then we should allow this test on Linux PAL as well.')
     def test_000_syscall_redirect(self):
         stdout, _ = self.run_binary(['syscall'])
@@ -834,7 +834,7 @@ class TC_40_FileSystem(RegressionTestCase):
 class TC_50_GDB(RegressionTestCase):
     def setUp(self):
         if not self.has_debug():
-            self.skipTest('test runs only when Graphene is compiled with DEBUG=1')
+            self.skipTest('test runs only when Gramine is compiled with DEBUG=1')
 
     def find(self, name, stdout):
         match = re.search('<{0} start>(.*)<{0} end>'.format(name), stdout, re.DOTALL)
@@ -845,7 +845,7 @@ class TC_50_GDB(RegressionTestCase):
         # pylint: disable=fixme
         #
         # To run this test manually, use:
-        # GDB=1 GDB_SCRIPT=debug.gdb graphene-{direct|sgx} debug
+        # GDB=1 GDB_SCRIPT=debug.gdb gramine-{direct|sgx} debug
         #
         # TODO: strengthen this test after SGX includes enclave entry.
         #
@@ -878,7 +878,7 @@ class TC_50_GDB(RegressionTestCase):
     @unittest.skipUnless(ON_X86, 'x86-specific')
     def test_010_regs_x86_64(self):
         # To run this test manually, use:
-        # GDB=1 GDB_SCRIPT=debug_regs-x86_64.gdb graphene-{direct|sgx} debug_regs-x86_64
+        # GDB=1 GDB_SCRIPT=debug_regs-x86_64.gdb gramine-{direct|sgx} debug_regs-x86_64
 
         stdout, _ = self.run_gdb(['debug_regs-x86_64'], 'debug_regs-x86_64.gdb')
 
@@ -909,7 +909,7 @@ class TC_80_Socket(RegressionTestCase):
         self.assertIn('epoll_wait test passed', stdout)
 
     def test_011_epoll_epollet(self):
-        stdout, _ = self.run_binary(['epoll_epollet', 'EMULATE_GRAPHENE_BUG'])
+        stdout, _ = self.run_binary(['epoll_epollet', 'EMULATE_GRAMINE_BUG'])
         self.assertIn('TEST OK', stdout)
 
     def test_020_poll(self):

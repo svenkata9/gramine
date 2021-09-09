@@ -22,7 +22,7 @@ struct shim_tcb {
     uint64_t            canary;
     shim_tcb_t*         self;
 
-    /* Function pointers for patched code calling into Graphene. */
+    /* Function pointers for patched code calling into Gramine. */
     void*               syscalldb;
     void*               handle_call;
 

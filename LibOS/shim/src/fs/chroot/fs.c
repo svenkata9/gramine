@@ -256,7 +256,7 @@ static int __query_attr(struct shim_dentry* dent, struct shim_file_data* data,
             break;
         case PAL_TYPE_PIPE:
             log_warning("trying to access '%s' which is a host-level FIFO (named pipe); "
-                        "Graphene supports only named pipes created by Graphene processes",
+                        "Gramine supports only named pipes created by Gramine processes",
                         qstrgetstr(&data->host_uri));
             return -EACCES;
         default:
@@ -288,7 +288,7 @@ static int __query_attr(struct shim_dentry* dent, struct shim_file_data* data,
      *
      * Applications are unlikely to depend on exact value of `nlink`, and for us, it's inconvenient
      * to keep track of the exact value (we would have to list the directory, and also take into
-     * account synthetic files created by Graphene, such as named pipes and sockets).
+     * account synthetic files created by Gramine, such as named pipes and sockets).
      *
      * TODO: Make this a default for filesystems that don't provide `nlink`?
      */

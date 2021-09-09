@@ -1,6 +1,6 @@
 # This is a general manifest template for running SQLite.
 
-loader.preload = "file:{{ graphene.libos }}"
+loader.preload = "file:{{ gramine.libos }}"
 libos.entrypoint = "{{ execdir }}/sqlite3"
 loader.log_level = "{{ log_level }}"
 
@@ -13,7 +13,7 @@ loader.env.HOME = "/"
 
 fs.mount.lib.type = "chroot"
 fs.mount.lib.path = "/lib"
-fs.mount.lib.uri = "file:{{ graphene.runtimedir() }}"
+fs.mount.lib.uri = "file:{{ gramine.runtimedir() }}"
 
 fs.mount.lib64.type = "chroot"
 fs.mount.lib64.path = "{{ arch_libdir }}"
@@ -27,7 +27,7 @@ sgx.enclave_size = "256M"
 sgx.thread_num = 4
 
 sgx.trusted_files.sqlite3 = "file:{{ execdir }}/sqlite3"
-sgx.trusted_files.runtime = "file:{{ graphene.runtimedir() }}/"
+sgx.trusted_files.runtime = "file:{{ gramine.runtimedir() }}/"
 sgx.trusted_files.arch_libdir = "file:{{ arch_libdir }}/"
 
 sgx.allowed_files.scripts = "file:scripts/"
