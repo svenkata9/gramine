@@ -85,5 +85,14 @@ ifeq ($(UBSAN),1)
 CFLAGS_SANITIZERS += -fsanitize=undefined -fno-sanitize-recover=undefined -DUBSAN
 endif
 
+ifeq ($(ASAN),1)
+CFLAGS_SANITIZERS += \
+    -fsanitize=address \
+    -mllvm -asan-use-after-return=0 \
+    -mllvm -asan-stack=0 \
+    -mllvm -asan-globals=0 \
+    -DASAN
+endif
+
 MAKEFILE_CONFIGS_INCLUDED = y
 include $(MAKEFILE_CONFIGS_DIR)/Makefile.Host

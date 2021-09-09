@@ -118,6 +118,11 @@ ifeq ($(UBSAN),1)
 objs += ubsan.o
 endif
 
+# ASAN
+ifeq ($(ASAN),1)
+objs += asan.o
+endif
+
 $(addprefix $(target),crypto/adapters/mbedtls_adapter.o): crypto/mbedtls/library/aes.c
 
 ifeq ($(CRYPTO_PROVIDER),mbedtls)

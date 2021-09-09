@@ -9,8 +9,10 @@
 #include <limits.h>
 
 #include "api.h"
+#include "asan.h"
 #include "shim_entry.h"
 #include "shim_entry_api.h"
+#include "shim_thread.h"
 #include "shim_utils.h"
 
 /* Test: do nothing, return success */
@@ -19,24 +21,50 @@ static int run_test_pass(void) {
 }
 
 /* Test: invoke undefined behavior; enabled only when Graphene is compiled with UBSan */
-static int run_test_undefined(void) {
 #ifdef UBSAN
+static int run_test_undefined(void) {
     volatile int x = INT_MAX;
     x++;
     return 0;
-#else
-    return -EINVAL;
-#endif
 }
+#endif
+
+/* Test: allocate a buffer on heap, write past the end of buffer */
+#ifdef ASAN
+static int run_test_asan_buffer_overflow(void) {
+    uint8_t* buf = malloc(30);
+    buf[30] = 1;
+    free(buf);
+    return 0;
+}
+#endif
+
+static const struct shim_test {
+    const char* name;
+    int (*func)(void);
+} tests[] = {
+    { "pass", &run_test_pass },
+#ifdef UBSAN
+    { "undefined", &run_test_undefined },
+#endif
+#ifdef ASAN
+    { "asan_buffer_overflow", &run_test_asan_buffer_overflow },
+#endif
+    { NULL, NULL },
+};
 
 static int run_test(const char* test_name) {
     int ret;
 
     log_always("run_test(\"%s\") ...", test_name);
-    if (strcmp(test_name, "pass") == 0) {
-        ret = run_test_pass();
-    } else if (strcmp(test_name, "undefined") == 0) {
-        ret = run_test_undefined();
+
+    const struct shim_test* test;
+    for (test = &tests[0]; test->name; test++) {
+        if (strcmp(test_name, test->name) == 0)
+            break;
+    }
+    if (test->name) {
+        ret = test->func();
     } else {
         log_warning("run_test: invalid test name: \"%s\"", test_name);
         ret = -EINVAL;
