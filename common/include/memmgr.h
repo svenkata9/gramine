@@ -38,7 +38,8 @@
 DEFINE_LIST(mem_obj);
 typedef struct mem_obj {
 #ifdef ASAN
-    char redzone[8];
+    /* Make sure there is padding between objects, so that we can detect buffer overflows */
+    char padding[8];
 #endif
     union {
         LIST_TYPE(mem_obj) __list;
@@ -235,8 +236,6 @@ alloc:;
     }
     assert(mgr->obj <= mgr->obj_top);
     SYSTEM_UNLOCK();
-    asan_poison_region((uintptr_t)mobj, (uintptr_t)&mobj->obj - (uintptr_t)mobj,
-                       ASAN_POISON_HEAP_LEFT_REDZONE);
     asan_unpoison_region((uintptr_t)&mobj->obj, sizeof(mobj->obj));
     return &mobj->obj;
 }
@@ -256,7 +255,7 @@ static inline void free_mem_obj_to_mgr(MEM_MGR mgr, OBJ_TYPE* obj) {
 #ifdef DEBUG
     _real_memset(obj, 0xCC, sizeof(*obj));
 #endif
-    asan_poison_region((uintptr_t)mobj, sizeof(*mobj), ASAN_POISON_HEAP_AFTER_FREE);
+    asan_poison_region((uintptr_t)obj, sizeof(*obj), ASAN_POISON_HEAP_AFTER_FREE);
 
     SYSTEM_LOCK();
     INIT_LIST_HEAD(mobj, __list);

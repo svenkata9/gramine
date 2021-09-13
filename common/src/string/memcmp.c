@@ -6,7 +6,7 @@
 
 #ifndef ASAN
 __attribute__((alias("_real_memcmp")))
-void* memcmp(const void*, const void*, size_t);
+int memcmp(const void*, const void*, size_t);
 #endif
 
 __attribute__((no_sanitize("address")))

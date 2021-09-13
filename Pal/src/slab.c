@@ -78,7 +78,7 @@ static inline void* __malloc(size_t size) {
         _DkProcessExit(ENOMEM);
     }
 #ifdef ASAN
-    asan_poison_region((uintptr_t)addr, ALLOC_ALIGN_UP(size), ASAN_POISON_GLOBAL_REDZONE);
+    asan_poison_region((uintptr_t)addr, ALLOC_ALIGN_UP(size), ASAN_POISON_HEAP_LEFT_REDZONE);
 #endif
 
     return addr;
@@ -103,10 +103,7 @@ static inline void __free(void* addr, size_t size) {
             g_low = addr;
         }
         /* not a last object from low/high addresses, can't do anything about this case */
-#ifdef ASAN
-        /* Keep unallocated part of `g_mem_pool` poisoned */
-        asan_poison_region((uintptr_t)addr, size, ASAN_POISON_GLOBAL_REDZONE);
-#endif
+        /* ASAN: keep the memory poisoned, because we're not returning it to the system */
         SYSTEM_UNLOCK();
         return;
     }
@@ -132,7 +129,7 @@ void init_slab_mgr(size_t alignment) {
 #if STATIC_SLAB == 1
 #ifdef ASAN
     /* Poison all of `g_mem_pool` initially */
-    asan_poison_region((uintptr_t)&g_mem_pool, sizeof(g_mem_pool), ASAN_POISON_GLOBAL_REDZONE);
+    asan_poison_region((uintptr_t)&g_mem_pool, sizeof(g_mem_pool), ASAN_POISON_HEAP_LEFT_REDZONE);
 #endif
 #endif
 }

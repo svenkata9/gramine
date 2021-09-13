@@ -13,7 +13,7 @@
 
 #ifndef ASAN
 __attribute__((alias("_real_memset")))
-void* memset(void*, int*, size_t);
+void* memset(void*, int, size_t);
 #endif
 
 __attribute__((no_sanitize("address")))

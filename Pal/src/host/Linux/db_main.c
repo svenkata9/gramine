@@ -149,9 +149,9 @@ __attribute__((no_sanitize("address")))
 static void setup_asan(void) {
     int prot = PROT_READ | PROT_WRITE;
     int flags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_NORESERVE | MAP_FIXED_NOREPLACE;
-    void* ret = (void*)DO_SYSCALL(mmap, (void*)ASAN_SHADOW_START, ASAN_SHADOW_LENGTH, prot, flags,
-                                  /*fd=*/-1, /*offset=*/0);
-    if (ret == MAP_FAILED)
+    void* addr = (void*)DO_SYSCALL(mmap, (void*)ASAN_SHADOW_START, ASAN_SHADOW_LENGTH, prot, flags,
+                                   /*fd=*/-1, /*offset=*/0);
+    if (IS_PTR_ERR(addr))
         die_or_inf_loop();
 }
 #endif

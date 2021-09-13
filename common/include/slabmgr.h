@@ -317,9 +317,9 @@ static inline void* slab_alloc(SLAB_MGR mgr, size_t size) {
         mem->size = size;
         OBJ_LEVEL(mem) = (unsigned char)-1;
 
-        asan_poison_region((uintptr_t)mem, (uintptr_t)OBJ_RAW(mem) - (uintptr_t)mem,
-                           ASAN_POISON_HEAP_LEFT_REDZONE);
+#ifdef ASAN
         asan_unpoison_region((uintptr_t)OBJ_RAW(mem), size);
+#endif
         return OBJ_RAW(mem);
     }
 
@@ -358,9 +358,9 @@ static inline void* slab_alloc(SLAB_MGR mgr, size_t size) {
     unsigned long* m = (unsigned long*)((void*)OBJ_RAW(mobj) + slab_levels[level]);
     *m = SLAB_CANARY_STRING;
 #endif
-    asan_poison_region((uintptr_t)mobj, (uintptr_t)OBJ_RAW(mobj) - (uintptr_t)mobj,
-                       ASAN_POISON_HEAP_LEFT_REDZONE);
+#ifdef ASAN
     asan_unpoison_region((uintptr_t)OBJ_RAW(mobj), size);
+#endif
 
     return OBJ_RAW(mobj);
 }
@@ -433,7 +433,9 @@ static inline void slab_free(SLAB_MGR mgr, void* obj) {
 #ifdef DEBUG
     _real_memset(obj, 0xCC, slab_levels[level]);
 #endif
+#ifdef ASAN
     asan_poison_region((uintptr_t)obj, slab_levels[level], ASAN_POISON_HEAP_AFTER_FREE);
+#endif
 
     SYSTEM_LOCK();
     INIT_LIST_HEAD(mobj, __list);

@@ -55,7 +55,7 @@ void* __system_malloc(size_t size) {
     }
 
 #ifdef ASAN
-    asan_poison_region((uintptr_t)addr, alloc_size, ASAN_POISON_GLOBAL_REDZONE);
+    asan_poison_region((uintptr_t)addr, alloc_size, ASAN_POISON_HEAP_LEFT_REDZONE);
 #endif
     return addr;
 }
