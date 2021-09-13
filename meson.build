@@ -96,7 +96,10 @@ if get_option('b_sanitize') != 'none'
     error('Please don\'t use the b_sanitize option; use -Dubsan=enabled instead.')
 endif
 
-cflags_sanitizers = []
+cflags_sanitizers = [
+    '-fno-sanitize-link-runtime',
+]
+
 if ubsan
     cflags_sanitizers += [
         '-fsanitize=undefined',

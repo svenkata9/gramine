@@ -406,7 +406,9 @@ static inline void slab_free(SLAB_MGR mgr, void* obj) {
 #ifdef DEBUG
         _real_memset(obj, 0xCC, mem->size);
 #endif
+#ifdef ASAN
         asan_unpoison_region((uintptr_t)mem, mem->size + sizeof(LARGE_MEM_OBJ_TYPE));
+#endif
         system_free(mem, mem->size + sizeof(LARGE_MEM_OBJ_TYPE));
         return;
     }

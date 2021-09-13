@@ -57,6 +57,12 @@ $(crypto_mbedtls_library_objs): CFLAGS += -fno-sanitize=undefined
 $(addprefix $(target),$(crypto_mbedtls_library_objs)): CFLAGS += -fno-sanitize=undefined
 endif
 
+# Skip ASan for speed reasons, too.
+ifeq ($(ASAN),1)
+$(crypto_mbedtls_library_objs): CFLAGS += -fno-sanitize=address
+$(addprefix $(target),$(crypto_mbedtls_library_objs)): CFLAGS += -fno-sanitize=address
+endif
+
 endif
 
 MBEDTLS_VERSION ?= 2.26.0
