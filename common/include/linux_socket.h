@@ -84,6 +84,7 @@ struct mmsghdr {
 /* TCP options. */
 #define TCP_NODELAY 1
 #define TCP_CORK 3
+#define TCP_INFO 11
 
 struct linger {
     int l_onoff;

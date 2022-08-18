@@ -324,16 +324,16 @@ static int send(struct libos_handle* handle, struct iovec* iov, size_t iov_len, 
         return -ENOTCONN;
     }
 
-    if (force_nonblocking) {
-        lock(&handle->lock);
-        bool handle_is_nonblocking = handle->flags & O_NONBLOCK;
-        unlock(&handle->lock);
-        if (!handle_is_nonblocking) {
-            /* XXX: `PalStreamWrite` has no way of making one-time nonblocking write, so we have no
-             * other option but to fail. */
-            return -EINVAL;
-        }
-    }
+    // if (force_nonblocking) {
+    //    lock(&handle->lock);
+    //    bool handle_is_nonblocking = handle->flags & O_NONBLOCK;
+    //    unlock(&handle->lock);
+    //    if (!handle_is_nonblocking) {
+    //        /* XXX: `PalStreamWrite` has no way of making one-time nonblocking write, so we have no
+    //         * other option but to fail. */
+    //        return -EINVAL;
+    //    }
+    //}
 
     void* buf;
     size_t size;
@@ -384,16 +384,16 @@ static int recv(struct libos_handle* handle, struct iovec* iov, size_t iov_len, 
         return -ENOTCONN;
     }
 
-    if (force_nonblocking) {
-        lock(&handle->lock);
-        bool handle_is_nonblocking = handle->flags & O_NONBLOCK;
-        unlock(&handle->lock);
-        if (!handle_is_nonblocking) {
-            /* XXX: `PalStreamRead` has no way of making one-time nonblocking read, so we have no
-             * other option but to fail. */
-            return -EINVAL;
-        }
-    }
+    //if (force_nonblocking) {
+    //    lock(&handle->lock);
+    //    bool handle_is_nonblocking = handle->flags & O_NONBLOCK;
+    //    unlock(&handle->lock);
+    //    if (!handle_is_nonblocking) {
+    //        /* XXX: `PalStreamRead` has no way of making one-time nonblocking read, so we have no
+    //         * other option but to fail. */
+    //        return -EINVAL;
+    //    }
+    //}
 
     void* buf;
     size_t size;

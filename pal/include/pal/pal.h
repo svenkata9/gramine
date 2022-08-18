@@ -430,6 +430,7 @@ typedef struct _PAL_STREAM_ATTR {
             bool tcp_cork;
             bool tcp_nodelay;
             bool ipv6_v6only;
+            bool tcp_info;
         } socket;
     };
 } PAL_STREAM_ATTR;

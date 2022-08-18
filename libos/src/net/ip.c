@@ -504,6 +504,9 @@ static int get_tcp_option(struct libos_handle* handle, int optname, void* optval
         case TCP_NODELAY:
             val = attr.socket.tcp_nodelay;
             break;
+        case TCP_INFO:
+            val = attr.socket.tcp_info;
+            break;
         default:
             return -ENOPROTOOPT;
     }
