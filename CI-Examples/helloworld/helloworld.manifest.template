@@ -14,7 +14,7 @@ fs.mounts = [
 
 fs.insecure__keys.default = "abcdefabcdefabcdefabcdefabcdefab"
 
-sgx.debug = true
+#sgx.debug = true
 sgx.edmm_enable = {{ 'true' if env.get('EDMM', '0') == '1' else 'false' }}
 
 sgx.trusted_files = [

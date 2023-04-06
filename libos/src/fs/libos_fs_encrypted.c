@@ -6,7 +6,9 @@
 #include "assert.h"
 #include "crypto.h"
 #include "hex.h"
+#ifdef IPP_CRYPTO
 #include "ippcp.h"
+#endif
 #include "libos_checkpoint.h"
 #include "libos_fs_encrypted.h"
 #include "libos_internal.h"
