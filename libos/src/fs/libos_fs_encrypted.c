@@ -6,6 +6,7 @@
 #include "assert.h"
 #include "crypto.h"
 #include "hex.h"
+#include "ippcp.h"
 #include "libos_checkpoint.h"
 #include "libos_fs_encrypted.h"
 #include "libos_internal.h"
@@ -105,21 +106,125 @@ static pf_status_t cb_aes_cmac(const pf_key_t* key, const void* input, size_t in
 static pf_status_t cb_aes_gcm_encrypt(const pf_key_t* key, const pf_iv_t* iv, const void* aad,
                                       size_t aad_size, const void* input, size_t input_size,
                                       void* output, pf_mac_t* mac) {
-    int ret = lib_AESGCMEncrypt((const uint8_t*)key, sizeof(*key), (const uint8_t*)iv, input,
+    int ret = 0;
+#ifndef IPP_CRYPTO
+    ret = lib_AESGCMEncrypt((const uint8_t*)key, sizeof(*key), (const uint8_t*)iv, input,
                                 input_size, aad, aad_size, output, (uint8_t*)mac, sizeof(*mac));
     if (ret != 0) {
         log_warning("lib_AESGCMEncrypt failed: %d", ret);
         return PF_STATUS_CALLBACK_FAILED;
     }
+#else
+    int state_size = 0;
+    IppsAES_GCMState *p_state = NULL;
+    ret = ippsAES_GCMGetSize(&state_size);
+    if (ret != ippStsNoErr)
+    {
+        log_warning("AESGCMEncrypt failed: %d", ret);
+        return PF_STATUS_CALLBACK_FAILED;
+    }
+    p_state = (IppsAES_GCMState*)malloc(state_size);
+    if (ret != ippStsNoErr)
+    {
+        log_warning("AESGCMEncrypt failed: %d", ret);
+        return PF_STATUS_CALLBACK_FAILED;
+    }
+    ret = ippsAES_GCMInit((Ipp8u*)key, sizeof(*key), p_state, state_size);
+    if (ret != ippStsNoErr)
+    {
+        memset(p_state, 0, state_size);
+        free(p_state);
+        log_warning("AESGCMEncrypt failed: %d", ret);
+        return PF_STATUS_CALLBACK_FAILED;
+    }
+    ret = ippsAES_GCMStart((Ipp8u*)iv, 12, aad, aad_size, p_state);
+    if (ret != ippStsNoErr)
+    {
+        memset(p_state, 0, state_size);
+        free(p_state);
+        log_warning("AESGCMEncrypt failed: %d", ret);
+        return PF_STATUS_CALLBACK_FAILED;
+    }
+    ret = ippsAES_GCMEncrypt(input, output, input_size, p_state);
+    if (ret != ippStsNoErr)
+    {
+        memset(p_state, 0, state_size);
+        free(p_state);
+        log_warning("AESGCMEncrypt failed: %d", ret);
+        return PF_STATUS_CALLBACK_FAILED;
+    }
+    ret = ippsAES_GCMGetTag((Ipp8u*)mac, sizeof(*mac), p_state);
+    if (ret != ippStsNoErr)
+    {
+        memset(p_state, 0, state_size);
+        free(p_state);
+        log_warning("AESGCMEncrypt failed: %d", ret);
+        return PF_STATUS_CALLBACK_FAILED;
+    }
+    memset(p_state, 0, state_size);
+    free(p_state);
+#endif
     return PF_STATUS_SUCCESS;
 }
 
 static pf_status_t cb_aes_gcm_decrypt(const pf_key_t* key, const pf_iv_t* iv, const void* aad,
                                       size_t aad_size, const void* input, size_t input_size,
                                       void* output, const pf_mac_t* mac) {
-    int ret = lib_AESGCMDecrypt((const uint8_t*)key, sizeof(*key), (const uint8_t*)iv, input,
+    int ret = 0;
+#ifndef IPP_CRYPTO
+    ret = lib_AESGCMDecrypt((const uint8_t*)key, sizeof(*key), (const uint8_t*)iv, input,
                                 input_size, aad, aad_size, output, (const uint8_t*)mac,
                                 sizeof(*mac));
+#else
+    int state_size = 0;
+    IppsAES_GCMState *p_state = NULL;
+    ret = ippsAES_GCMGetSize(&state_size);
+    if (ret != ippStsNoErr)
+    {
+        log_warning("AESGCMDecrypt failed: %d", ret);
+        return PF_STATUS_CALLBACK_FAILED;
+    }
+    p_state = (IppsAES_GCMState*)malloc(state_size);
+    if (ret != ippStsNoErr)
+    {
+        log_warning("AESGCMDecrypt failed: %d", ret);
+        return PF_STATUS_CALLBACK_FAILED;
+    }
+    ret = ippsAES_GCMInit((Ipp8u*)key, sizeof(*key), p_state, state_size);
+    if (ret != ippStsNoErr)
+    {
+        memset(p_state, 0, state_size);
+        free(p_state);
+        log_warning("AESGCMDecrypt failed: %d", ret);
+        return PF_STATUS_CALLBACK_FAILED;
+    }
+    ret = ippsAES_GCMStart((Ipp8u*)iv, 12, aad, aad_size, p_state);
+    if (ret != ippStsNoErr)
+    {
+        memset(p_state, 0, state_size);
+        free(p_state);
+        log_warning("AESGCMDecrypt failed: %d", ret);
+        return PF_STATUS_CALLBACK_FAILED;
+    }
+    ret = ippsAES_GCMDecrypt(input, output, input_size, p_state);
+    if (ret != ippStsNoErr)
+    {
+        memset(p_state, 0, state_size);
+        free(p_state);
+        log_warning("AESGCMDecrypt failed: %d", ret);
+        return PF_STATUS_CALLBACK_FAILED;
+    }
+    ret = ippsAES_GCMGetTag((Ipp8u*)mac, sizeof(*mac), p_state);
+    if (ret != ippStsNoErr)
+    {
+        memset(p_state, 0, state_size);
+        free(p_state);
+        log_warning("AESGCMDecrypt failed: %d", ret);
+        return PF_STATUS_CALLBACK_FAILED;
+    }
+    memset(p_state, 0, state_size);
+    free(p_state);
+#endif
     if (ret != 0) {
         log_warning("lib_AESGCMDecrypt failed: %d", ret);
         return PF_STATUS_CALLBACK_FAILED;
@@ -215,7 +320,7 @@ out:
     return ret;
 }
 
-/* Used only in debug code, no need to be side-channel-resistant. */
+/* Used only in debug code / by deprecated options, no need to be side-channel-resistant. */
 int parse_pf_key(const char* key_str, pf_key_t* pf_key) {
     size_t len = strlen(key_str);
     if (len != sizeof(*pf_key) * 2) {
@@ -230,6 +335,14 @@ int parse_pf_key(const char* key_str, pf_key_t* pf_key) {
         return -EINVAL;
     }
     memcpy(pf_key, &tmp_pf_key, sizeof(tmp_pf_key));
+    return 0;
+}
+
+int dump_pf_key(const pf_key_t* pf_key, char* buf, size_t buf_size) {
+    if (buf_size < sizeof(*pf_key) * 2 + 1)
+        return -EINVAL;
+
+    bytes2hex(pf_key, sizeof(*pf_key), buf, buf_size);
     return 0;
 }
 
@@ -301,6 +414,31 @@ int init_encrypted_files(void) {
             assert(key_str);
 
             ret = parse_and_update_key(key_name, key_str);
+            free(key_str);
+            if (ret < 0)
+                return ret;
+        }
+    }
+
+    /*
+     * If we're under SGX PAL, parse `sgx.insecure__protected_files_key` (and interpret it as the
+     * "default" key).
+     *
+     * TODO: this is deprecated in v1.2, remove two versions later.
+     */
+    if (!strcmp(g_pal_public_state->host_type, "Linux-SGX")) {
+        char* key_str;
+        ret = toml_string_in(g_manifest_root, "sgx.insecure__protected_files_key", &key_str);
+        if (ret < 0) {
+            log_error("Cannot parse 'sgx.insecure__protected_files_key'");
+            return -EINVAL;
+        }
+
+        if (key_str) {
+            log_error("Detected deprecated syntax: 'sgx.insecure__protected_files_key'. "
+                      "Consider converting it to 'fs.insecure__keys.default'.");
+
+            ret = parse_and_update_key("default", key_str);
             free(key_str);
             if (ret < 0)
                 return ret;

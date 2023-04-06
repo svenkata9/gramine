@@ -9,7 +9,10 @@ loader.env.LD_LIBRARY_PATH = "/lib"
 fs.mounts = [
   { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
   { path = "/helloworld", uri = "file:helloworld" },
+  { path = "/helloworld.txt", uri = "file:helloworld.txt", type = "encrypted" },
 ]
+
+fs.insecure__keys.default = "abcdefabcdefabcdefabcdefabcdefab"
 
 sgx.debug = true
 sgx.edmm_enable = {{ 'true' if env.get('EDMM', '0') == '1' else 'false' }}
