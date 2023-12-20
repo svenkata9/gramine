@@ -35,6 +35,7 @@ dcap = get_option('dcap') == 'enabled'
 ubsan = get_option('ubsan') == 'enabled'
 asan = get_option('asan') == 'enabled'
 vtune = get_option('vtune') == 'enabled'
+ippcp = get_option('ippcp') == 'enabled'
 
 enable_libgomp = get_option('libgomp') == 'enabled'
 enable_tests = get_option('tests') == 'enabled'
@@ -144,6 +145,11 @@ if sgx
     if vtune
         add_project_arguments('-DSGX_VTUNE_PROFILE', language: 'c')
         vtune_sdk_path = get_option('vtune_sdk_path')
+    endif
+
+    if ippcp
+        add_project_arguments('-DIPP_CRYPTO', language: 'c')
+        ippcp_path = get_option('ippcp_path')
     endif
 
     conf_sgx.set('CONFIG_SGX_DRIVER_INCLUDE', sgx_driver_include)
@@ -268,6 +274,22 @@ if sgx
                 dl_dep,
             ],
             include_directories: include_directories(vtune_sdk_path / 'include'),
+        )
+    endif
+
+    ippcp_dep = []
+    if ippcp
+        if (ippcp_path.startswith('/'))
+          ippcp_dir = ippcp_path
+        else
+          ippcp_dir = meson.project_source_root() + '/' + ippcp_path
+        endif
+        message(ippcp_dir)
+        ippcp_dep = declare_dependency(
+            dependencies: [
+                cc.find_library('ippcp_s_k1', dirs: ippcp_dir / 'lib/', required: true),
+            ],
+            include_directories: include_directories(ippcp_path / 'include'),
         )
     endif
 endif

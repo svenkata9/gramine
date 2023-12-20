@@ -37,3 +37,8 @@ option('vtune', type: 'combo', choices: ['disabled', 'enabled'],
 option('vtune_sdk_path', type: 'string',
     value: '/opt/intel/oneapi/vtune/latest/sdk',
     description: 'Path to the VTune SDK installation')
+option('ippcp', type: 'combo', choices: ['disabled', 'enabled'],
+    description: 'Enable IPP-CP crypto for AES-GCM and SHA256')
+option('ippcp_path', type: 'string',
+    value: 'subprojects/packagefiles/ippcp_2021.7.0/',
+    description: 'Path to the IPPCP lib')
